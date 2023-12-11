@@ -20,5 +20,4 @@ data:
   TELEMETRY_METRICS_ENABLED: {{ $metricsEnabled | quote }}
   TELEMETRY_METRICS_URL: {{ $metricsUrl }}
   {{ end }}
-  GPKG_LIST: {{ .Values.env.gpkgList | quote }}
 {{- end }}

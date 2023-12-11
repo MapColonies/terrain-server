@@ -51,7 +51,6 @@ env:
     prometheus:
       scrape: true
       port: 8000
-  gpkgList: '[{"id": "terrain-tiles", "path": "/data/terrain-tiles.gpkg" }]'
 
 resources:
   enabled: true

@@ -18,7 +18,4 @@ services:
     ports:
       - 8000:8000
 
-    environment:
-      GPKG_LIST: '[{"id": "meimad", "path": "meimad.gpkg" }]'
-
     restart: unless-stopped
