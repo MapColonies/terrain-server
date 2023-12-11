@@ -1,0 +1,24 @@
+{{- if .Values.enabled -}}
+{{- $tracingEnabled := include "terrain-server.tracingEnabled" . -}}
+{{- $tracingUrl := include "terrain-server.tracingUrl" . -}}
+{{- $metricsEnabled := include "terrain-server.metricsEnabled" . -}}
+{{- $metricsUrl := include "terrain-server.metricsUrl" . -}}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ .Release.Name }}-configmap
+data:
+  REQUEST_PAYLOAD_LIMIT: {{ .Values.env.requestPayloadLimit | quote }}
+  RESPONSE_COMPRESSION_ENABLED: {{ .Values.env.responseCompressionEnabled | quote }}
+  LOG_LEVEL: {{ .Values.env.logLevel | quote }}
+  LOG_PRETTY_PRINT_ENABLED: {{ .Values.env.logPrettyPrintEnabled | quote }}
+  {{ if .Values.env.tracing.enabled }}
+  TELEMETRY_TRACING_ENABLED: {{ $tracingEnabled | quote }}
+  TELEMETRY_TRACING_URL: {{ $tracingUrl }}
+  {{ end }}
+  {{ if .Values.env.metrics.enabled }}
+  TELEMETRY_METRICS_ENABLED: {{ $metricsEnabled | quote }}
+  TELEMETRY_METRICS_URL: {{ $metricsUrl }}
+  {{ end }}
+  GPKG_LIST: {{ .Values.env.gpkgList | quote }}
+{{- end }}

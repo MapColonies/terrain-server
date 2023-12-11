@@ -1,0 +1,136 @@
+global:
+  cloudProvider: {}
+  tracing: {}
+  metrics: {}
+  environment: {}
+
+enabled: true
+environment: development
+replicaCount: 1
+initialDelaySeconds: 60
+nodePort: 30030 #for minikube deployment only
+resetOnConfigChange: true
+imagePullPolicy: Always
+splunkIndex: ''
+
+cloudProvider:
+  dockerRegistryUrl: my-docker-registry
+  imagePullSecretName: secret
+  flavor: openshift
+
+caSecretName: ''
+caPath: /usr/local/share/ca-certificates
+caKey: ca.crt
+
+pvc: dem-pvc-int
+
+image:
+  repository: terrain-server
+  tag: v1.0.0
+
+authentication:
+  jwtPublicKeySecretName: secret
+  opa:
+    enabled: true
+    customHeaderName: x-api-key
+
+env:
+  port: 8080
+  targetPort: 8000
+  protocol: TCP
+  logLevel: info
+  logPrettyPrintEnabled: false
+  responseCompressionEnabled: true
+  requestPayloadLimit: 8mb
+  tracing:
+    enabled: true
+    url: http://otel-collector:4318/v1/traces
+  metrics:
+    enabled: true
+    url: http://otel-collector:4318/v1/metrics
+    prometheus:
+      scrape: true
+      port: 8000
+  gpkgList: '[{"id": "terrain-tiles", "path": "/data/terrain-tiles.gpkg" }]'
+
+resources:
+  enabled: true
+  value:
+    limits:
+      cpu: 500m
+      memory: 900Mi
+    requests:
+      cpu: 125m
+      memory: 900Mi
+
+nginx:
+  enabled: true
+  replicaCount: 1
+  image:
+    repository: nginx
+    tag: merge
+  port: 8080
+  internalPort: 80
+  nodePort: 30001
+  resources:
+    enabled: true
+    value:
+      limits:
+        cpu: 500m
+        memory: 900Mi
+      requests:
+        cpu: 125m
+        memory: 900Mi
+
+opa:
+  image: openpolicyagent/opa
+  imageTag: 0.29.4-envoy-3
+  port: 9191
+  enableLogging: false
+  resources:
+    enabled: true
+    value:
+      limits:
+        cpu: 400m
+        memory: 200Mi
+      requests:
+        cpu: 100m
+        memory: 200Mi
+        
+envoy:
+  image: envoyproxy/envoy
+  imageTag: v1.20.7
+  port: 6565
+  maxRequestBytes: 8192
+  requestedDomain: dem
+  resources:
+    enabled: true
+    value:
+      limits:
+        cpu: 500m
+        memory: 900Mi
+      requests:
+        cpu: 125m
+        memory: 900Mi
+
+route:
+  enabled: true
+  https: true
+  host:
+  path: /api/dem/v1
+  timeout:
+    enabled: false # defaults to 30s by openshift
+    duration: 60s # supported units (us, ms, s, m, h, d)
+  useCert: false
+
+ingress:
+  enabled: false
+  type: nginx-org # supported values: 'nginx-org' | 'nginx-kubernetes'
+  tls:
+    enabled: false
+    useExternal: ''
+  host:
+  path: /dem-terrain-server
+  cors:
+    enabled: true
+    origin: '*'
