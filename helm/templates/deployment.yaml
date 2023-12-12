@@ -51,6 +51,9 @@ spec:
           image: {{ $cloudProviderDockerRegistryUrl }}{{ .repository }}:{{ $imageTag }}
           {{- end }}
           imagePullPolicy: {{ .Values.imagePullPolicy }}
+          command:
+            - sleep
+            - infinity
           volumeMounts:
             {{- if .Values.caSecretName }}
             - mountPath: {{ printf "%s/%s" .Values.caPath .Values.caKey | quote }}
