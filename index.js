@@ -6,13 +6,14 @@ const path = require('path');
 const fs = require('fs');
 
 const PORT = process.env.PORT || 8000;
+const MAX_CONNECTIONS = process.env.MAX_CONNECTIONS || 100;
 const TERRAIN_TILES_TABLE = 'terrain_tiles';
 const LAYER_JSON_TABLE = 'layer_json';
-const GPKG_PATH = '/home/ellama/Downloads/data/';
+const GPKG_PATH = '/data';
 const SUFFIX = '.gpkg';
 const terrains = new Map();
 const OPTS = {
-  max: 10, // maximum number of connections to create at any given time (default: 1)
+  max: MAX_CONNECTIONS, // maximum number of connections to create at any given time (default: 1)
   min: 2 // minimum number of connections to keep in pool at any given time (default: 0)
 };
 
@@ -25,7 +26,7 @@ fs.readdirSync(GPKG_PATH).forEach(file => {
     // Create a factory object for creating SQLite connections
     const factory = {
       create: function() {
-        return new sqlite3(`${GPKG_PATH}${file}`, { readonly: true });
+        return new sqlite3(path.join(GPKG_PATH, file), { readonly: true });
       },
       destroy: function(db) {
         db.close();
@@ -49,15 +50,18 @@ app.get('/terrains/:gpkg/:z/:x/:y.terrain', async (request, response) => {
     gpkgPool = terrains.get(gpkg);
     // Acquire a connection from the gpkg's pool
     connection = await gpkgPool.acquire();
+    console.log(' BEFORE ACQ gpkgPool.available=', gpkgPool.available);
     const stmt = connection.prepare(query);
     const result = stmt.get(z, x, y);
+    await gpkgPool.release(connection);
+    console.log(' AFTER ACQ gpkgPool.available=', gpkgPool.available);
 
     response.header('Content-Encoding', 'gzip');
     response.type('application/octet-stream');
     response.send(result.tile_data);
   } catch (err) {
+    // If an error occurs, ensure the connection is released back to the pool
     if (connection) {
-      // If an error occurs, ensure the connection is released back to the pool
       await gpkgPool.release(connection);
     }
     response.status(500).json({ error: err.message });
@@ -76,11 +80,12 @@ app.get('/terrains/:gpkg/layer.json', async (request, response) => {
     connection = await gpkgPool.acquire();
     const stmt = connection.prepare(query);
     const result = stmt.get();
+    await gpkgPool.release(connection);
 
     response.json(JSON.parse(result.data));
   } catch (err) {
+    // If an error occurs, ensure the connection is released back to the pool
     if (connection) {
-      // If an error occurs, ensure the connection is released back to the pool
       await gpkgPool.release(connection);
     }
     response.status(500).json({ error: err.message });
