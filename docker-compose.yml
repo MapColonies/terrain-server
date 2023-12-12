@@ -11,7 +11,7 @@ services:
     container_name: terrain-server-container
     
     volumes:
-      - ~/Downloads/data:/data
+      - /data:/data
 
     network_mode: host
 
