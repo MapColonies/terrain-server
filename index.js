@@ -7,6 +7,7 @@ const fs = require('fs');
 
 const PORT = process.env.PORT || 8000;
 const MAX_CONNECTIONS = process.env.MAX_CONNECTIONS || 100;
+const MIN_CONNECTIONS = process.env.MIN_CONNECTIONS || 10;
 const TERRAIN_TILES_TABLE = 'terrain_tiles';
 const LAYER_JSON_TABLE = 'layer_json';
 const GPKG_PATH = '/data';
@@ -14,7 +15,7 @@ const SUFFIX = '.gpkg';
 const terrains = new Map();
 const OPTS = {
   max: MAX_CONNECTIONS, // maximum number of connections to create at any given time (default: 1)
-  min: 2 // minimum number of connections to keep in pool at any given time (default: 0)
+  min: MIN_CONNECTIONS // minimum number of connections to keep in pool at any given time (default: 0)
 };
 
 const app = express();
@@ -90,6 +91,10 @@ app.get('/terrains/:gpkg/layer.json', async (request, response) => {
     }
     response.status(500).json({ error: err.message });
   }
+});
+
+app.get('/health', async (request, response) => {
+  response.status(200).send();
 });
 
 app.listen(PORT, () => {

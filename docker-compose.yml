@@ -20,5 +20,6 @@ services:
 
     environment:
       MAX_CONNECTIONS: 10
+      MIN_CONNECTIONS: 2
 
     restart: unless-stopped

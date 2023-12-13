@@ -84,7 +84,7 @@ spec:
           livenessProbe:
             initialDelaySeconds: {{ .Values.initialDelaySeconds }}
             httpGet:
-              path: /docs
+              path: /health
               port: {{ .Values.env.targetPort }}
           {{- if .Values.resources.enabled }}
           resources:
