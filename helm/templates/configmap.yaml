@@ -20,10 +20,4 @@ data:
   TELEMETRY_METRICS_ENABLED: {{ $metricsEnabled | quote }}
   TELEMETRY_METRICS_URL: {{ $metricsUrl }}
   {{ end }}
-  {{ if .Values.env.maxConnections }}
-  MAX_CONNECTIONS: {{ .Values.env.maxConnections | quote }}
-  {{ end }}
-  {{ if .Values.env.minConnections }}
-  MIN_CONNECTIONS: {{ .Values.env.minConnections | quote }}
-  {{ end }}
 {{- end }}

@@ -18,8 +18,4 @@ services:
     ports:
       - 8000:8000
 
-    environment:
-      MAX_CONNECTIONS: 10
-      MIN_CONNECTIONS: 2
-
     restart: unless-stopped
